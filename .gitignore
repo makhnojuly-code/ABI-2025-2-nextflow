@@ -1,0 +1,6 @@
+work/
+downloads/
+results/
+my_output/
+.nextflow*
+*.Zone.Identifier

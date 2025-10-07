@@ -72,7 +72,6 @@ process Velvet {
 process TagContigs {
   input:
     tuple val(sample), path(contig)
-
   output:
     path "${sample}.contigs.fasta"
 
@@ -87,7 +86,6 @@ process QuastAll {
   cpus params.threads
 
   input:
-    // список файлов (уже уникальные имена)
     path contigs
 
   output:
@@ -104,12 +102,9 @@ process QuastAll {
 }
 workflow {
   sp = Spades(single_reads)
-
-  // уникальные имена для contigs
   renamed = TagContigs(sp.contig_fasta)
 
   if (params.enable_quast) {
-    // один список -> один запуск QUAST -> один общий отчёт
     all_contigs = renamed.collect()
     QuastAll(all_contigs)
   }

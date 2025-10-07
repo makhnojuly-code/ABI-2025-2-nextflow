@@ -48,7 +48,6 @@ process fasterq_dump {
 
 // ---------- 3) FASTQUTILS STATS ----------
 process fastq_stats {
-   
    container "https://depot.galaxyproject.org/singularity/ngsutils%3A0.5.9--py27h9801fc8_5"
  
   publishDir "${params.outdir}/stats", mode: 'copy', overwrite: true
@@ -101,8 +100,6 @@ process fastp {
     path "${fastq.baseName}_fastp.json", emit: fastp_json
     path "${fastq.baseName}_fastp.html", emit: fastp_html
 
-    
-
   script:
   """
   fastp \
@@ -135,16 +132,11 @@ process multiqc {
   
    script:
    """
-  
   multiqc ${qc_files} -o .
-
    """
-
 }
   
-
 // ---------- WORKFLOW ----------
-
 
 workflow {
 
@@ -153,12 +145,11 @@ workflow {
         .map { it.trim() }
         .filter { it && !it.startsWith('#') }
 
-    // 1) SRA → FASTQ
-    sra_ch = prefetch(accs).sra_file                 // взять ИМЕННО emit-канал
+    sra_ch = prefetch(accs).sra_file                 
     fqd    = fasterq_dump(sra_ch)
-    all_fastqs = fqd.fastq_files.flatten()           // список .fastq (SE или PE + singletons)
+    all_fastqs = fqd.fastq_files.flatten()        
 
-    // 2) QC-вилки — берём ИМЕННО emit-каналы
+
     stats_ch   = fastq_stats(all_fastqs).stats_file  // *.stats.txt
     fqres      = fastqc(all_fastqs)
     fastqc_html_ch = fqres.fastqc_html               // *_fastqc.html
@@ -167,17 +158,14 @@ workflow {
     fpres      = fastp(all_fastqs)
     fastp_json_ch = fpres.fastp_json                 // *_fastp.json
     fastp_html_ch = fpres.fastp_html                 // *_fastp.html
-    // (trimmed fastq лежат в fpres.trimmed_fastq — их можно тоже собрать, если нужно)
-
-    // 3) Собираем всё что нужно для MultiQC в один канал
+   
     qc_files = Channel.empty()
         .mix(stats_ch)
         .mix(fastqc_html_ch)
         .mix(fastqc_zip_ch)
         .mix(fastp_json_ch)
         .mix(fastp_html_ch)
-        .collect()                                   // одна пачка файлов в один запуск
-
-    // 4) Запуск multiqc
+        .collect()                                  
     multiqc(qc_files)
 }
+

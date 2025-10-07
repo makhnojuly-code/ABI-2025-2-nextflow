@@ -8,10 +8,10 @@ params.with_stats  = params.with_stats  ?: true
 
 
 
-params.cut_window_size  = params.cut_window_size  ?: 5
-params.cut_mean_quality = params.cut_mean_quality ?: 15
-params.length_required  = params.length_required  ?: 30
-params.average_qual     = params.average_qual     ?: 15
+params.cut_window_size  = params.cut_window_size  ?: 10
+params.cut_mean_quality = params.cut_mean_quality ?: 20
+params.length_required  = params.length_required  ?: 36
+params.average_qual     = params.average_qual     ?: 20
 
 // ---------- 1) PREFETCH ----------
 process prefetch {
@@ -168,4 +168,5 @@ workflow {
         .collect()                                  
     multiqc(qc_files)
 }
+
 
